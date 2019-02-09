@@ -4,13 +4,17 @@
   "description": "",
   "main": "app.js",
   "scripts": {
+    "start": "./node_modules/.bin/parcel index.html --no-hmr",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "babel-preset-preact": "^1.1.0",
     "preact": "^8.4.2",
     "preact-compat": "^3.18.4"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "parcel-bundler": "^1.11.0"
   }
 }
