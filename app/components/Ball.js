@@ -54,7 +54,24 @@ export default class Ball extends Component {
         left: (this.state.left + newVelocity.x),
         velocity: newVelocity
       });
-
+    }
+    if ((this.state.left < 50) || (this.state.left > (BOARD_SIZE - 50))) {
+      this.props.reportPosition({
+        top: this.state.top,
+        left: this.state.left
+      }, (() => {
+        // TODO REFACTOR THIS
+        console.log('should flip velocity');
+        const newVelocity = {
+          x: (this.state.velocity.x * -1),
+          y: (this.state.velocity.y)
+        };
+        this.setState({
+          top: (this.state.top + newVelocity.y),
+          left: (this.state.left + newVelocity.x),
+          velocity: newVelocity
+        });
+      }).bind(this));
     }
     // console.log('this.state', this.state);
   }

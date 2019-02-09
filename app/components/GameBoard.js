@@ -18,11 +18,14 @@ const initialState = {
   }
 };
 
+const between = (min, max) => num => (num >= min) && (num <= max);
+
 export default class GameBoard extends Component {
   constructor(props) {
     super(props)
     this.setState(initialState)
     this.logCursorPosition = this.logCursorPosition.bind(this);
+    this.reportBallPosition = this.reportBallPosition.bind(this);
   }
   componentDidMount() {
     this.frameTimerID = setInterval(
@@ -47,6 +50,17 @@ export default class GameBoard extends Component {
       }
     });
   }
+  reportBallPosition(position, whenCollision) {
+    //console.log(position);
+    if (position.left === 10)
+      this.checkCollision(position, this.state.playerPaddle.posY, whenCollision);
+  }
+  checkCollision(ballPos, paddleY, whenCollision) {
+    if (between(paddleY, paddleY + 50)(ballPos.top)) {
+      console.warn('BALL COLIISOASDIAPADDIELE');
+      whenCollision();
+    }
+  }
   render({}, { message, playerPaddle, frame }) {
     return (
       <div 
@@ -55,7 +69,11 @@ export default class GameBoard extends Component {
       >
         {message}
         <Paddle posY={playerPaddle.posY} />
-        <Ball frame={frame} />
+        <Ball 
+          reportPosition={this.checkCollision} 
+          frame={frame}
+          reportPosition={this.reportBallPosition}
+        />
       </div>
     )
   }
