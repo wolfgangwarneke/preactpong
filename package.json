@@ -1,0 +1,16 @@
+{
+  "name": "preactpong",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "babel-preset-preact": "^1.1.0",
+    "preact": "^8.4.2",
+    "preact-compat": "^3.18.4"
+  }
+}
