@@ -44,7 +44,7 @@ const initialState = {
   },
   computer: {
     score: 0,
-    speed: 2,
+    speed: 1.8,
     position: {
       x: 485,
       y: 50
@@ -85,7 +85,6 @@ export default class Pong extends Component {
       frame: this.state.frame + 1
     });
     if (this.state.playing) {
-      this.computerFollowBall();
       this.updateBall();
       if (this.state.ball.position.x === -10) {
         this.scorePoint('computer');
@@ -95,15 +94,16 @@ export default class Pong extends Component {
         this.resetBall();
       }
     }
+    this.computerFollowBall();
   }
   handleMouseMove(e) {
     this.updateXY('player', 'position', { y: e.offsetY });
   }
   handleClick() {
-    this.setState({
-      playing: true
-    });
-    this.launchBall();
+    if (!this.state.playing) {
+      this.setPlaying(true);
+      this.launchBall();
+    }
   }
   updateXY(entity, prop, coordinates) {
     const { x, y } = coordinates;
@@ -172,8 +172,9 @@ export default class Pong extends Component {
       ballCheckPositionX === paddleCheckPositionX 
       && between(paddleCheckPositionYMin, paddleCheckPositionYMax)(ballCheckPositionY)
     ) {
-      const invertedVelocityX = this.state.ball.velocity.x * -1; // REFACTOR
+      const invertedVelocityX = invert(this.state.ball.velocity.x); // REFACTOR
       this.updateXY('ball', 'velocity', { x: invertedVelocityX });
+      // this.speedUpBall();
     }
   }
   checkBallWallCollision() {
@@ -188,15 +189,21 @@ export default class Pong extends Component {
     const computerPositionY = this.state.computer.position.y;
     const computerPositionYOffset = computerPositionY + 25;
     let paddleMovement = 0;
-    if (ballPositionY > computerPositionYOffset) {
+    if (ballPositionY > computerPositionYOffset + 1) { // 1 offset for glitchiness
       paddleMovement = this.state.computer.speed;
-    } else if (ballPositionY < computerPositionYOffset) {
+    } else if (ballPositionY < computerPositionYOffset - 1) { // -1 offset for glitchiness
       paddleMovement = invert(this.state.computer.speed);
     }
     this.updateXY('computer', 'position', {
       y: computerPositionY + paddleMovement
     });
   }
+  // speedUpBall() {
+  //   const ballVelocityX = this.state.ball.velocity.x;
+  //   const isNegative = ballVelocityX < 0;
+  //   const increment = isNegative ? invert(1) : 1;
+  //   this.updateXY('ball', 'velocity', { x: ballVelocityX + increment });
+  // }
 
   render({}, { message, player, computer, ball }) {
     return (
