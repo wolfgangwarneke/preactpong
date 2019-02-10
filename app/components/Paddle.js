@@ -1,6 +1,7 @@
 import { h, render, Component } from 'preact';
 
 const paddleStyle = {
+  pointerEvents: 'none',
   width: 5,
   height: 50,
   backgroundColor: 'white',

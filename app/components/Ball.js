@@ -1,6 +1,7 @@
 import { h, render, Component } from 'preact';
 
 const ballStyle = {
+  pointerEvents: 'none',
   borderRadius: '50%',
   backgroundColor: '#fff',
   position: 'absolute',
