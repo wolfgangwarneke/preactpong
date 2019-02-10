@@ -1,6 +1,7 @@
 import { h, render, Component } from 'preact';
 
 const baseStyle = {
+  pointerEvents: 'none',
   position: 'absolute',
   top: 0,
   padding: "2 5"
