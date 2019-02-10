@@ -44,7 +44,7 @@ const initialState = {
   },
   computer: {
     score: 0,
-    speed: 1,
+    speed: 2,
     position: {
       x: 485,
       y: 50
@@ -117,6 +117,11 @@ export default class Pong extends Component {
       }
     })
   }
+  setPlaying(bool) {
+    this.setState({
+      playing: bool
+    });
+  }
   resetBall() {
     this.updateXY('ball', 'position', initialState.ball.position);
     this.updateXY('ball', 'velocity', initialState.ball.velocity);
@@ -134,6 +139,7 @@ export default class Pong extends Component {
         score: this.state[entity].score + 1
       }
     });
+    this.setPlaying(false);
   }
   updateBall() {
     this.checkBallPaddleCollision('player');
@@ -180,7 +186,7 @@ export default class Pong extends Component {
   computerFollowBall() {
     const ballPositionY = this.state.ball.position.y;
     const computerPositionY = this.state.computer.position.y;
-    const computerPositionYOffset = computerPositionY - 25;
+    const computerPositionYOffset = computerPositionY + 25;
     let paddleMovement = 0;
     if (ballPositionY > computerPositionYOffset) {
       paddleMovement = this.state.computer.speed;
