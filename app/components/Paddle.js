@@ -7,22 +7,10 @@ const paddleStyle = {
   position: 'absolute'
 };
 
-const initialState = {
-  top: 40, // not being used...
-  left: 10
-};
-
-export default class Paddle extends Component {
-  constructor(props) {
-    super(props)
-    this.setState(initialState)
-  }
-  logCursorPosition(e) {
-    this.setState({ message: `x: ${e.offsetX}, y: ${e.offsetY}` });
-  }
-  render({posY}, { left }) {
-    return (
-      <div style={{...paddleStyle, left ,top: posY }}></div>
-    )
-  }
+export default (props) => {
+  const left = props.position.x || 0;
+  const top = props.position.y || 0;
+  return (
+    <div {...props} style={{...paddleStyle, top, left}}></div>
+  )
 }

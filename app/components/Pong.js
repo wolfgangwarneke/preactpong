@@ -1,8 +1,28 @@
 import { h, render, Component } from 'preact';
-import DumbPaddle from './DumbPaddle';
-import DumbBall from './DumbBall';
-import DumbGameBoard from './DumbGameboard';
+import Paddle from './Paddle';
+import Ball from './Ball';
+import GameBoard from './Gameboard';
 import { FRAME_RATE } from '../gameConstants';
+
+// TODOS
+// - win condition
+// - speed up ball each volley
+// - randomize initial ball y velocity
+// - paddle delta
+// - paddle edge collisions
+// - collision sounds
+// - win/lose sounds
+
+const coord = (x, y) => {
+  return {
+    x,
+    y
+  }
+};
+
+const coinFlip = () => Math.random() < 0.5;
+
+const invert = (num) => num * -1;
 
 const gameBoardStyle = {
   width: '500px',
@@ -16,14 +36,17 @@ const initialState = {
   message: 'Pong',
   playing: false,
   player: {
+    score: 0,
     position: {
       x: 10,
       y: 250
     }
   },
   computer: {
+    score: 0,
+    speed: 1,
     position: {
-      x: 410,
+      x: 485,
       y: 50
     }
   },
@@ -61,12 +84,16 @@ export default class Pong extends Component {
     this.setState({
       frame: this.state.frame + 1
     });
-    // if ball on player side checkCollision(player)
-    // if ball on paddle side checkCollision(computer)
-    // if ball out of left bounds scorePoint(player)
-    // if ball out of right bounds scorePoint(computer)
     if (this.state.playing) {
+      this.computerFollowBall();
       this.updateBall();
+      if (this.state.ball.position.x === -10) {
+        this.scorePoint('computer');
+        this.resetBall();
+      } else if (this.state.ball.position.x === 500) {
+        this.scorePoint('player');
+        this.resetBall();
+      }
     }
   }
   handleMouseMove(e) {
@@ -74,7 +101,7 @@ export default class Pong extends Component {
   }
   handleClick() {
     this.setState({
-      playing: !this.state.playing
+      playing: true
     });
     this.launchBall();
   }
@@ -90,15 +117,25 @@ export default class Pong extends Component {
       }
     })
   }
+  resetBall() {
+    this.updateXY('ball', 'position', initialState.ball.position);
+    this.updateXY('ball', 'velocity', initialState.ball.velocity);
+  }
   launchBall() {
     this.updateXY('ball', 'velocity', {
-      x: 1,
+      x: coinFlip() ? 1 : -1,
       y: -2
     });
   }
+  scorePoint(entity) {
+    this.setState({
+      [entity]: {
+        ...this.state[entity],
+        score: this.state[entity].score + 1
+      }
+    });
+  }
   updateBall() {
-    // check collision with player
-    // check collision with computer
     this.checkBallPaddleCollision('player');
     this.checkBallPaddleCollision('computer');
     this.checkBallWallCollision();
@@ -140,15 +177,29 @@ export default class Pong extends Component {
       this.updateXY('ball', 'velocity', { y: invertedVelocityY });
     }
   }
+  computerFollowBall() {
+    const ballPositionY = this.state.ball.position.y;
+    const computerPositionY = this.state.computer.position.y;
+    const computerPositionYOffset = computerPositionY - 25;
+    let paddleMovement = 0;
+    if (ballPositionY > computerPositionYOffset) {
+      paddleMovement = this.state.computer.speed;
+    } else if (ballPositionY < computerPositionYOffset) {
+      paddleMovement = invert(this.state.computer.speed);
+    }
+    this.updateXY('computer', 'position', {
+      y: computerPositionY + paddleMovement
+    });
+  }
 
   render({}, { message, player, computer, ball }) {
     return (
-      <DumbGameBoard onMouseMove={this.handleMouseMove} onClick={this.handleClick}>
-        {message}
-        <DumbPaddle position={player.position} />
-        <DumbPaddle position={computer.position} />
-        <DumbBall position={ball.position} />
-      </DumbGameBoard>
+      <GameBoard onMouseMove={this.handleMouseMove} onClick={this.handleClick}>
+        {message} Player: {player.score} Computer: {computer.score}
+        <Paddle position={player.position} />
+        <Paddle position={computer.position} />
+        <Ball position={ball.position} />
+      </GameBoard>
     )
   }
 }
