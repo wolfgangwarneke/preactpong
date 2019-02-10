@@ -2,13 +2,15 @@ import { h, render, Component } from 'preact';
 import Paddle from './Paddle';
 import Ball from './Ball';
 import GameBoard from './Gameboard';
+import Message from './Message';
 import { FRAME_RATE } from '../gameConstants';
-import { runInThisContext } from 'vm';
+import MenuMessage from './MenuMessage';
 
 // TODOS
+// - update to use game constants more/betterer
 // - win condition
-// - speed up ball each volley
 // - randomize initial ball y velocity
+// - refactor/modularize in general
 // - paddle delta
 // - paddle edge collisions
 // - handle player speed
@@ -162,10 +164,10 @@ export default class Pong extends Component {
   }
   checkBallPaddleCollision(entity) {
     let ballCheckPositionX = this.state.ball.position.x;
-    let ballCheckPositionY = this.state.ball.position.y + 5; // offset for half of ball
+    let ballCheckPositionY = this.state.ball.position.y;
     let paddleCheckPositionX = this.state[entity].position.x;
-    let paddleCheckPositionYMin = this.state[entity].position.y;
-    let paddleCheckPositionYMax = paddleCheckPositionYMin + 50;
+    let paddleCheckPositionYMin = this.state[entity].position.y - 5; // offset for half of ball
+    let paddleCheckPositionYMax = paddleCheckPositionYMin + 50 + 5; // offset for offset
     if (entity === 'player') {
       paddleCheckPositionX += 5; // offset for paddle width
     } else if (entity === 'computer') {
@@ -178,7 +180,7 @@ export default class Pong extends Component {
       inRangeAdjustedForVelocity(ballCheckPositionX)
       && between(paddleCheckPositionYMin, paddleCheckPositionYMax)(ballCheckPositionY)
     ) {
-      console.log('collision', Math.random());
+      // console.log('collision', Math.random());
       const invertedVelocityX = invert(this.state.ball.velocity.x); // REFACTOR
       this.clearBallFromPaddle(entity); // 'player' or 'computer'
       this.updateXY('ball', 'velocity', { x: invertedVelocityX });
@@ -220,10 +222,22 @@ export default class Pong extends Component {
     this.updateXY('ball', 'velocity', { x: ballVelocityX + increment });
   }
 
-  render({}, { message, player, computer, ball }) {
+  render({}, { message, player, computer, ball, playing }) {
     return (
       <GameBoard onMouseMove={this.handleMouseMove} onClick={this.handleClick}>
-        {message} Player: {player.score} Computer: {computer.score}
+        { !playing && !computer.score && !player.score &&
+          (<MenuMessage>
+            <h2>Preact Pong</h2>
+            <p>click to start</p>
+          </MenuMessage>)
+        }
+        { player.score >= 10 && 
+          (<MenuMessage>
+            <h2>YOU WIN</h2>
+          </MenuMessage>)
+        }
+        <Message left>Player: {player.score}</Message>
+        <Message right>Computer: {computer.score}</Message>
         <Paddle position={player.position} />
         <Paddle position={computer.position} />
         <Ball position={ball.position} />
