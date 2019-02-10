@@ -3,6 +3,7 @@ import Paddle from './Paddle';
 import Ball from './Ball';
 import GameBoard from './Gameboard';
 import { FRAME_RATE } from '../gameConstants';
+import { runInThisContext } from 'vm';
 
 // TODOS
 // - win condition
@@ -10,6 +11,8 @@ import { FRAME_RATE } from '../gameConstants';
 // - randomize initial ball y velocity
 // - paddle delta
 // - paddle edge collisions
+// - handle player speed
+// - handle mouse reentry
 // - collision sounds
 // - win/lose sounds
 
@@ -44,7 +47,7 @@ const initialState = {
   },
   computer: {
     score: 0,
-    speed: 1.8,
+    speed: 1.85,
     position: {
       x: 485,
       y: 50
@@ -86,10 +89,10 @@ export default class Pong extends Component {
     });
     if (this.state.playing) {
       this.updateBall();
-      if (this.state.ball.position.x === -10) {
+      if (this.state.ball.position.x <= -10) {
         this.scorePoint('computer');
         this.resetBall();
-      } else if (this.state.ball.position.x === 500) {
+      } else if (this.state.ball.position.x >= 500) {
         this.scorePoint('player');
         this.resetBall();
       }
@@ -159,27 +162,39 @@ export default class Pong extends Component {
   }
   checkBallPaddleCollision(entity) {
     let ballCheckPositionX = this.state.ball.position.x;
-    let ballCheckPositionY = this.state.ball.position.y;
+    let ballCheckPositionY = this.state.ball.position.y + 5; // offset for half of ball
     let paddleCheckPositionX = this.state[entity].position.x;
     let paddleCheckPositionYMin = this.state[entity].position.y;
     let paddleCheckPositionYMax = paddleCheckPositionYMin + 50;
     if (entity === 'player') {
       paddleCheckPositionX += 5; // offset for paddle width
     } else if (entity === 'computer') {
-      ballCheckPositionX += 5; // offset for ball width
+      ballCheckPositionX += 10; // offset for ball width
     }
+    const ballVelocityX = this.state.ball.velocity.x;
+    const inRangeAdjustedForVelocity = between(paddleCheckPositionX - Math.abs(ballVelocityX), paddleCheckPositionX + Math.abs(ballVelocityX));
     if (
-      ballCheckPositionX === paddleCheckPositionX 
+      // ballCheckPositionX === paddleCheckPositionX 
+      inRangeAdjustedForVelocity(ballCheckPositionX)
       && between(paddleCheckPositionYMin, paddleCheckPositionYMax)(ballCheckPositionY)
     ) {
+      console.log('collision', Math.random());
       const invertedVelocityX = invert(this.state.ball.velocity.x); // REFACTOR
+      this.clearBallFromPaddle(entity); // 'player' or 'computer'
       this.updateXY('ball', 'velocity', { x: invertedVelocityX });
-      // this.speedUpBall();
+      this.speedUpBall();
     }
+  }
+  clearBallFromPaddle(entity) {
+    // const ballVelocityX = this.state.ball.velocity.x;
+    // const clearPositionX = entity === 'player' ? 15 + ballVelocityX : 484 - ballVelocityX;
+    // this.updateXY('ball', 'position', {
+    //   x: clearPositionX
+    // });
   }
   checkBallWallCollision() {
     const ballPositionY = this.state.ball.position.y;
-    if (ballPositionY === 0 || ballPositionY === 490) {
+    if (ballPositionY <= 0 || ballPositionY >= 490) {
       const invertedVelocityY = this.state.ball.velocity.y * -1; // REFACTOR
       this.updateXY('ball', 'velocity', { y: invertedVelocityY });
     }
@@ -198,12 +213,12 @@ export default class Pong extends Component {
       y: computerPositionY + paddleMovement
     });
   }
-  // speedUpBall() {
-  //   const ballVelocityX = this.state.ball.velocity.x;
-  //   const isNegative = ballVelocityX < 0;
-  //   const increment = isNegative ? invert(1) : 1;
-  //   this.updateXY('ball', 'velocity', { x: ballVelocityX + increment });
-  // }
+  speedUpBall() {
+    const ballVelocityX = this.state.ball.velocity.x;
+    const isNegative = ballVelocityX < 0;
+    const increment = isNegative ? invert(0.5) : 0.5;
+    this.updateXY('ball', 'velocity', { x: ballVelocityX + increment });
+  }
 
   render({}, { message, player, computer, ball }) {
     return (

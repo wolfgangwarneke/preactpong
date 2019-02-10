@@ -1,8 +1,8 @@
 import { h, render, Component } from 'preact';
 
 const paddleStyle = {
-  width: '5px',
-  height: '50px',
+  width: 5,
+  height: 50,
   backgroundColor: 'white',
   position: 'absolute'
 };
