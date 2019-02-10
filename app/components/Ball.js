@@ -1,12 +1,13 @@
 import { h, render, Component } from 'preact';
+import { BALL_DIAMETER } from '../utils/gameConstants';
 
 const ballStyle = {
   pointerEvents: 'none',
   borderRadius: '50%',
   backgroundColor: '#fff',
   position: 'absolute',
-  width: 10,
-  height: 10
+  width: BALL_DIAMETER,
+  height: BALL_DIAMETER
 }
 
 export default (props) => {

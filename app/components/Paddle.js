@@ -1,9 +1,10 @@
 import { h, render, Component } from 'preact';
+import { PADDLE_WIDTH, PADDLE_HEIGHT } from '../utils/gameConstants';
 
 const paddleStyle = {
   pointerEvents: 'none',
-  width: 5,
-  height: 50,
+  width: PADDLE_WIDTH,
+  height: PADDLE_HEIGHT,
   backgroundColor: 'white',
   position: 'absolute'
 };

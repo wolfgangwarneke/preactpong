@@ -9,7 +9,8 @@ const menuStyle = {
   fontFamily: 'monospace',
   color: 'red',
   textAlign: 'center',
-  pointerEvents: 'none'
+  pointerEvents: 'none',
+  zIndex: 1
 };
 
 export default (props) => {

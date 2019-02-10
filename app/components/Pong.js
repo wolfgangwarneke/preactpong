@@ -3,62 +3,55 @@ import Paddle from './Paddle';
 import Ball from './Ball';
 import GameBoard from './Gameboard';
 import Message from './Message';
-import { FRAME_RATE } from '../gameConstants';
+import { 
+  FRAME_RATE, 
+  BOARD_SIZE,
+  PADDLE_HEIGHT,
+  PADDLE_WIDTH,
+  PADDLE_GUTTER,
+  BALL_DIAMETER,
+  COMPUTER_PADDLE_SPEED
+} from '../utils/gameConstants';
 import MenuMessage from './MenuMessage';
+import { coinFlip, between, invert, half } from '../utils/helpers'
 
 // TODOS
 // - update to use game constants more/betterer
 // - win condition
+// - refactor messaging system
 // - randomize initial ball y velocity
 // - refactor/modularize in general
 // - paddle delta
 // - paddle edge collisions
-// - handle player speed
+// - handle player speed, follow cursor instead of BE cursor
 // - handle mouse reentry
+// - randomly move computer around at start screen
+// - improve computer paddle behavior
 // - collision sounds
 // - win/lose sounds
 
-const coord = (x, y) => {
-  return {
-    x,
-    y
-  }
-};
-
-const coinFlip = () => Math.random() < 0.5;
-
-const invert = (num) => num * -1;
-
-const gameBoardStyle = {
-  width: '500px',
-  height: '500px',
-  backgroundColor: 'blue',
-  position: 'relative'
-};
-
 const initialState = {
   frame: 0,
-  message: 'Pong',
   playing: false,
   player: {
     score: 0,
     position: {
-      x: 10,
-      y: 250
+      x: PADDLE_GUTTER,
+      y: half(BOARD_SIZE) - half(PADDLE_HEIGHT)
     }
   },
   computer: {
     score: 0,
-    speed: 1.85,
+    speed: COMPUTER_PADDLE_SPEED,
     position: {
-      x: 485,
+      x: BOARD_SIZE - PADDLE_GUTTER - PADDLE_WIDTH,
       y: 50
     }
   },
   ball: {
     position: {
-      x: 250,
-      y: 250
+      x: half(BOARD_SIZE) - half(BALL_DIAMETER),
+      y: half(BOARD_SIZE) - half(BALL_DIAMETER)
     },
     velocity: {
       x: 0,
@@ -66,8 +59,6 @@ const initialState = {
     }
   }
 };
-
-const between = (min, max) => num => (num >= min) && (num <= max);
 
 export default class Pong extends Component {
   constructor(props) {
@@ -91,10 +82,10 @@ export default class Pong extends Component {
     });
     if (this.state.playing) {
       this.updateBall();
-      if (this.state.ball.position.x <= -10) {
+      if (this.state.ball.position.x <= -BALL_DIAMETER) {
         this.scorePoint('computer');
         this.resetBall();
-      } else if (this.state.ball.position.x >= 500) {
+      } else if (this.state.ball.position.x >= BOARD_SIZE) {
         this.scorePoint('player');
         this.resetBall();
       }
@@ -134,7 +125,7 @@ export default class Pong extends Component {
   launchBall() {
     this.updateXY('ball', 'velocity', {
       x: coinFlip() ? 1 : -1,
-      y: -2
+      y: -2 // TO DO randomize
     });
   }
   scorePoint(entity) {
@@ -169,9 +160,9 @@ export default class Pong extends Component {
     let paddleCheckPositionYMin = this.state[entity].position.y - 5; // offset for half of ball
     let paddleCheckPositionYMax = paddleCheckPositionYMin + 50 + 5; // offset for offset
     if (entity === 'player') {
-      paddleCheckPositionX += 5; // offset for paddle width
+      paddleCheckPositionX += PADDLE_WIDTH; // offset for paddle width
     } else if (entity === 'computer') {
-      ballCheckPositionX += 10; // offset for ball width
+      ballCheckPositionX += BALL_DIAMETER; // offset for ball diameter
     }
     const ballVelocityX = this.state.ball.velocity.x;
     const inRangeAdjustedForVelocity = between(paddleCheckPositionX - Math.abs(ballVelocityX), paddleCheckPositionX + Math.abs(ballVelocityX));
@@ -196,7 +187,7 @@ export default class Pong extends Component {
   }
   checkBallWallCollision() {
     const ballPositionY = this.state.ball.position.y;
-    if (ballPositionY <= 0 || ballPositionY >= 490) {
+    if (ballPositionY <= 0 || ballPositionY >= (BOARD_SIZE - BALL_DIAMETER)) {
       const invertedVelocityY = this.state.ball.velocity.y * -1; // REFACTOR
       this.updateXY('ball', 'velocity', { y: invertedVelocityY });
     }
@@ -204,9 +195,9 @@ export default class Pong extends Component {
   computerFollowBall() {
     const ballPositionY = this.state.ball.position.y;
     const computerPositionY = this.state.computer.position.y;
-    const computerPositionYOffset = computerPositionY + 25;
+    const computerPositionYOffset = computerPositionY + half(PADDLE_WIDTH);
     let paddleMovement = 0;
-    if (ballPositionY > computerPositionYOffset + 1) { // 1 offset for glitchiness
+    if (ballPositionY > computerPositionYOffset + 1 && (computerPositionY < (BOARD_SIZE - PADDLE_HEIGHT))) { // 1 offset for glitchiness
       paddleMovement = this.state.computer.speed;
     } else if (ballPositionY < computerPositionYOffset - 1) { // -1 offset for glitchiness
       paddleMovement = invert(this.state.computer.speed);
@@ -222,7 +213,7 @@ export default class Pong extends Component {
     this.updateXY('ball', 'velocity', { x: ballVelocityX + increment });
   }
 
-  render({}, { message, player, computer, ball, playing }) {
+  render({}, { player, computer, ball, playing }) {
     return (
       <GameBoard onMouseMove={this.handleMouseMove} onClick={this.handleClick}>
         { !playing && !computer.score && !player.score &&
