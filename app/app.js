@@ -1,11 +1,9 @@
 import { h, render, Component } from 'preact';
-import GameBoard from './components/GameBoard';
+import Pong from './components/Pong';
 
 render((
   <div id="pong-app">
     <h1>Preact Pong</h1>
-    <GameBoard>
-
-    </GameBoard>
+    <Pong />
   </div>
 ), document.getElementById('app'));
