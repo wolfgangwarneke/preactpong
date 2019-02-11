@@ -1,4 +1,4 @@
-import { h, render, Component } from 'preact';
+import { h, Component } from 'preact';
 import Paddle from './Paddle';
 import Ball from './Ball';
 import GameBoard from './Gameboard';
@@ -167,28 +167,26 @@ export default class Pong extends Component {
     const ballVelocityX = this.state.ball.velocity.x;
     const inRangeAdjustedForVelocity = between(paddleCheckPositionX - Math.abs(ballVelocityX), paddleCheckPositionX + Math.abs(ballVelocityX));
     if (
-      // ballCheckPositionX === paddleCheckPositionX 
       inRangeAdjustedForVelocity(ballCheckPositionX)
       && between(paddleCheckPositionYMin, paddleCheckPositionYMax)(ballCheckPositionY)
     ) {
-      // console.log('collision', Math.random());
-      const invertedVelocityX = invert(this.state.ball.velocity.x); // REFACTOR
-      this.clearBallFromPaddle(entity); // 'player' or 'computer'
+      const invertedVelocityX = invert(this.state.ball.velocity.x);
       this.updateXY('ball', 'velocity', { x: invertedVelocityX });
+      // corner hits
+      if (
+        between(paddleCheckPositionYMin, paddleCheckPositionYMin + 5)(ballCheckPositionY)
+        || between(paddleCheckPositionYMax, paddleCheckPositionYMin - 5)(ballCheckPositionY)
+      ) {
+        const velMultiplier = 1.1; // TODO avoid magic constant
+        this.updateXY('ball', 'velocity', { y: this.state.ball.velocity.y * velMultiplier });
+      }
       this.speedUpBall();
     }
-  }
-  clearBallFromPaddle(entity) {
-    // const ballVelocityX = this.state.ball.velocity.x;
-    // const clearPositionX = entity === 'player' ? 15 + ballVelocityX : 484 - ballVelocityX;
-    // this.updateXY('ball', 'position', {
-    //   x: clearPositionX
-    // });
   }
   checkBallWallCollision() {
     const ballPositionY = this.state.ball.position.y;
     if (ballPositionY <= 0 || ballPositionY >= (BOARD_SIZE - BALL_DIAMETER)) {
-      const invertedVelocityY = this.state.ball.velocity.y * -1; // REFACTOR
+      const invertedVelocityY = invert(this.state.ball.velocity.y);
       this.updateXY('ball', 'velocity', { y: invertedVelocityY });
     }
   }

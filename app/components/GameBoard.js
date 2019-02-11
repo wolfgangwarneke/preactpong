@@ -1,4 +1,4 @@
-import { h, render, Component } from 'preact';
+import { h } from 'preact';
 import { BOARD_SIZE } from '../utils/gameConstants';
 
 const gameBoardStyle = {

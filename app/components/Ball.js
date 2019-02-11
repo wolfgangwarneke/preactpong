@@ -1,4 +1,4 @@
-import { h, render, Component } from 'preact';
+import { h } from 'preact';
 import { BALL_DIAMETER } from '../utils/gameConstants';
 
 const ballStyle = {

@@ -13,7 +13,4 @@ const menuStyle = {
   zIndex: 1
 };
 
-export default (props) => {
-  console.log('menu message!');
-  return <Message style={menuStyle}>{props.children}</Message>
-}
+export default (props) => <Message style={menuStyle}>{props.children}</Message>

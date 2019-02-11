@@ -1,4 +1,4 @@
-import { h, render, Component } from 'preact';
+import { h } from 'preact';
 import { PADDLE_WIDTH, PADDLE_HEIGHT } from '../utils/gameConstants';
 
 const paddleStyle = {
